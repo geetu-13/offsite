@@ -3,38 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload & Query PDFs</title>
+    <title>Mission Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
         }
 
         .container {
-            width: 500px;
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
         }
 
-        .card {
+        .left, .right {
+            flex: 1;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            text-align: center;
         }
 
         h2 {
-            margin-bottom: 15px;
             color: #333;
+            margin-bottom: 15px;
         }
 
-        input[type="file"] {
-            display: none;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
         }
 
         .custom-file-upload {
@@ -44,35 +79,13 @@
             color: white;
             border-radius: 5px;
             cursor: pointer;
+            text-align: center;
+           
             transition: background 0.3s;
         }
 
         .custom-file-upload:hover {
             background-color: #0056b3;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background-color: #218838;
         }
 
         .progress-container {
@@ -81,27 +94,6 @@
             border-radius: 5px;
             margin-top: 10px;
             display: none;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background: #007bff;
-            color: white;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
         }
 
         .progress-bar {
@@ -128,16 +120,27 @@
             background-color: #007bff;
             color: white;
         }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
+        
+        <!-- Left Section: Mission & Team Details -->
+        <div class="left">
             <h2>Mission Details</h2>
             <table>
                 <tr>
-                    <th>Mission</th>
-                    <td>Mission Statement</td>
+                    <th>Mission Name</th>
+                    <td>Mission statement</td>
                 </tr>
             </table>
 
@@ -151,11 +154,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>1</td><td></td><td>Sr. CE</td></tr>
-                    <tr><td>2</td><td></td><td>FCP</td></tr>
-                    <tr><td>3</td><td></td><td>CE</td></tr>
-                    <tr><td>4</td><td></td><td>CE</td></tr>
-                    <tr><td>5</td><td></td><td>CE</td></tr>
+                    <tr><td>1</td><td>Alice Johnson</td><td>Sr. CE</td></tr>
+                    <tr><td>2</td><td>Bob Smith</td><td>FCP</td></tr>
+                    <tr><td>3</td><td>Charlie Brown</td><td>CE</td></tr>
+                    <tr><td>4</td><td>David Williams</td><td>CE</td></tr>
+                    <tr><td>5</td><td>Emily Davis</td><td>CE</td></tr>
                 </tbody>
             </table>
 
@@ -163,30 +166,26 @@
             <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
         </div>
 
-
-        <!-- Section 1: File Upload -->
-        <div class="card">
+        <!-- Right Section: Upload PDFs, Query & Output -->
+        <div class="right">
+            <!-- Upload PDFs Section -->
             <h2>Upload PDF Files</h2>
             <form id="uploadForm" enctype="multipart/form-data">
-                <label for="fileInput" class="custom-file-upload">Choose PDFs</label>
-                <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple>
-                <button type="submit">Upload</button>
+                <label for="fileInput" class="custom-file-upload" >Browse Files</label>
+                <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple style="display: none;">
+                <button type="submit">Upload PDFs</button>
             </form>
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             <p id="status"></p>
-        </div>
 
-        <!-- Section 2: Query Input -->
-        <div class="card">
+            <!-- Query Input Section -->
             <h2>Enter Query</h2>
             <textarea id="queryInput" rows="3" placeholder="Enter your query..."></textarea>
             <button id="submitQuery">Submit Query</button>
-        </div>
 
-        <!-- Section 3: Output Table -->
-        <div class="card">
+            <!-- Output Table Section -->
             <h2>Query Output</h2>
             <table class="output-table">
                 <thead>
@@ -240,7 +239,6 @@
                 return;
             }
 
-            // Simulated table update
             let tableBody = document.getElementById("outputTableBody");
             tableBody.innerHTML = `
                 <tr>
