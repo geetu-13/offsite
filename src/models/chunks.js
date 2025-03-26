@@ -1,10 +1,16 @@
 require('dotenv').config();
-const {client} = require('../connection');
-const database = client.db(process.env.DATABASE);
-const collection = database.collection(process.env.COLLECTION);
+const { MongoClient } = require('mongodb');
 
+// const {client} = require('../connection');
+// if (client) return;
+const uri = process.env.MONGODB_URI; 
+client = new MongoClient(uri);
+// console.log("Connected to MonogDB")
 
 const save = async (chunk) => {
+    await client.connect();
+    const database = client.db(process.env.DATABASE);
+    const collection = database.collection(process.env.COLLECTION);
     return await collection.insertOne(chunk);
 }
 

@@ -55,28 +55,28 @@ app.post("/api/upload", upload.array("pdfs", 10), async (req, res) => {
     }
 });
 
-// Get all processed PDFs
-app.get("/api/pdfs", async (req, res) => {
-    try {
-        const pdfs = await getAllPDFs();
-        res.json(pdfs);
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching PDFs' });
-    }
-});
+// // Get all processed PDFs
+// app.get("/api/pdfs", async (req, res) => {
+//     try {
+//         const pdfs = await getAllPDFs();
+//         res.json(pdfs);
+//     } catch (error) {
+//         res.status(500).json({ error: 'Error fetching PDFs' });
+//     }
+// });
 
-// Get a specific PDF by ID
-app.get("/api/pdf/:id", async (req, res) => {
-    try {
-        const pdf = await getPDFById(req.params.id);
-        res.json(pdf);
-    } catch (error) {
-        if (error.message === 'PDF not found') {
-            res.status(404).json({ error: 'PDF not found' });
-        } else {
-            res.status(500).json({ error: 'Error fetching PDF' });
-        }
-    }
-});
+// // Get a specific PDF by ID
+// app.get("/api/pdf/:id", async (req, res) => {
+//     try {
+//         const pdf = await getPDFById(req.params.id);
+//         res.json(pdf);
+//     } catch (error) {
+//         if (error.message === 'PDF not found') {
+//             res.status(404).json({ error: 'PDF not found' });
+//         } else {
+//             res.status(500).json({ error: 'Error fetching PDF' });
+//         }
+//     }
+// });
 
 module.exports = app;

@@ -1,6 +1,6 @@
 const pdfParse = require("pdf-parse");
-const PDF = require("../models/PDF");
 const { generateEmbeding, analyzeSentiment } = require("./llm");
+const chunksModel = require('../models/chunks');
 
 // Validate PDF buffer
 function validatePDFBuffer(buffer) {
@@ -64,24 +64,24 @@ async function processPDF(file, maxRetries = 3) {
             }
 
             // Create and save PDF document
-            const pdf = new PDF({
-                filename: file.originalname,
-                originalName: file.originalname,
-                content: data.text,
-                sentiment: sentiment,
-                embeddings: embeddings,
-                metadata: {
-                    pageCount: data.numpages,
-                    processingAttempts: attempt
-                }
-            });
-
-            await pdf.save();
+            // const pdf = new PDF({
+            //     filename: file.originalname,
+            //     originalName: file.originalname,
+            //     content: data.text,
+            //     sentiment: sentiment,
+            //     embeddings: embeddings,
+            //     metadata: {
+            //         pageCount: data.numpages,
+            //         processingAttempts: attempt
+            //     }
+            // });
+            await chunksModel.save({ name: file.originalname, content: data.text , embeddings, sentiment })
+            // await pdf.save();
             
             console.log(`Successfully processed ${file.originalname} on attempt ${attempt}`);
             return {
                 success: true,
-                pdf: pdf,
+                // pdf: pdf,
                 message: `Successfully processed ${file.originalname} on attempt ${attempt}`
             };
         } catch (error) {
@@ -116,29 +116,29 @@ async function processPDF(file, maxRetries = 3) {
 }
 
 // Get all processed PDFs
-async function getAllPDFs() {
-    try {
-        return await PDF.find().sort({ uploadDate: -1 });
-    } catch (error) {
-        throw new Error('Error fetching PDFs');
-    }
-}
+// async function getAllPDFs() {
+//     try {
+//         return await PDF.find().sort({ uploadDate: -1 });
+//     } catch (error) {
+//         throw new Error('Error fetching PDFs');
+//     }
+// }
 
-// Get a specific PDF by ID
-async function getPDFById(id) {
-    try {
-        const pdf = await PDF.findById(id);
-        if (!pdf) {
-            throw new Error('PDF not found');
-        }
-        return pdf;
-    } catch (error) {
-        throw new Error('Error fetching PDF');
-    }
-}
+// // Get a specific PDF by ID
+// async function getPDFById(id) {
+//     try {
+//         const pdf = await PDF.findById(id);
+//         if (!pdf) {
+//             throw new Error('PDF not found');
+//         }
+//         return pdf;
+//     } catch (error) {
+//         throw new Error('Error fetching PDF');
+//     }
+// }
 
 module.exports = {
     processPDF,
-    getAllPDFs,
-    getPDFById
+    // getAllPDFs,
+    // getPDFById
 }; 
