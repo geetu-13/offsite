@@ -1,22 +1,13 @@
 require('dotenv').config()
 const app = require("./app");
-
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const {init} = require('./connection');
+// const {getResponse, analyzeSentiment} = require('./services/llm')
 
-console.log("MONGODB_URI:", MONGODB_URI);
-console.log("PORT:", PORT);
-
-const startServer = async () => {
-    try {
-        console.log("Connected to MongoDB!");
-        app.listen(PORT, () => {
-            console.log("Server running on port:", PORT);
-        }).on('error', (e) => console.error("Server error:", e));
-    } catch (error) {
-        console.error("MongoDB connection error:", error);
-        process.exit(1); 
-    }
-};
-
-startServer();
+init().then(() => {
+    app.listen(PORT, async () => {
+        console.log("Server Running on port", PORT);
+        // console.log(await getResponse("How many planets are there in solar system"));
+        // console.log(await analyzeSentiment("It is a very sad day"));
+    });
+})
