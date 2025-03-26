@@ -5,6 +5,7 @@ const path = require("path");
 const pdfParse = require("pdf-parse");
 const mongoose = require("mongoose");
 const PDF = require("./models/PDF");
+const { generateEmbeding, analyzeSentiment } = require("./services/llm");
 
 const app = express();
 app.use(cors());
@@ -80,11 +81,26 @@ async function processPDF(file, maxRetries = 3) {
                 throw new Error('PDF contains insufficient text content');
             }
 
+            // Generate embeddings and analyze sentiment
+            console.log(`Generating embeddings and analyzing sentiment for ${file.originalname}`);
+            const [embeddings, sentiment] = await Promise.all([
+                generateEmbeding(data.text),
+                analyzeSentiment(data.text)
+            ]);
+
+            // Validate embeddings format
+            if (!Array.isArray(embeddings) || embeddings.some(n => typeof n !== 'number')) {
+                console.log("Embedding format", embeddings)
+                throw new Error('Invalid embeddings format received from LLM');
+            }
+
             // Create and save PDF document
             const pdf = new PDF({
                 filename: file.originalname,
                 originalName: file.originalname,
                 content: data.text,
+                sentiment: sentiment,
+                embeddings: embeddings,
                 metadata: {
                     pageCount: data.numpages,
                     processingAttempts: attempt
@@ -103,10 +119,14 @@ async function processPDF(file, maxRetries = 3) {
             lastError = error;
             console.error(`Attempt ${attempt} failed for ${file.originalname}:`, error.message);
             
-            // If it's a genuine PDF corruption error, don't retry
+            // If it's a genuine PDF corruption error or LLM error, don't retry
             if (error.message.includes('Invalid PDF header') || 
                 error.message.includes('Invalid PDF footer') ||
-                error.message.includes('File too small')) {
+                error.message.includes('File too small') ||
+                error.message.includes('Failed to generate embedding') ||
+                error.message.includes('Failed to analyze sentiment') ||
+                error.message.includes('Invalid embeddings format') ||
+                error.message.includes('Invalid sentiment value')) {
                 break;
             }
 
