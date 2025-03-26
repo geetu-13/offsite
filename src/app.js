@@ -3,18 +3,12 @@ const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const pdfParse = require("pdf-parse");
-const mongoose = require("mongoose");
 const PDF = require("./models/PDF");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
 
 // Configure Multer to use memory storage
 const upload = multer({ 
