@@ -55,6 +55,22 @@ app.post("/api/upload", upload.array("pdfs", 10), async (req, res) => {
     }
 });
 
+// // Dummy search endpoint
+// app.get("/api/search", (req, res) => {
+//     const query = req.query.q || '';
+//     res.json({
+//         query: query,
+//         data: [
+//             {
+//                 column1: `Result 1 for "${query}"`,
+//                 column2: `Result 2 for "${query}"`,
+//                 column3: `Result 3 for "${query}"`
+//             }
+//         ]
+//     });
+// });
+
+
 // // Get all processed PDFs
 // app.get("/api/pdfs", async (req, res) => {
 //     try {

@@ -234,13 +234,17 @@
                     files = [];
                     updateSelectedFiles();
                     loadPDFs();
+                    alert('PDFs uploaded successfully');
+
+                    // Redirect to the query page after successful upload
+                    window.location.href = '/query.html';
 
                     // Show success message with any failures
-                    if (result.failed && result.failed.length > 0) {
-                        const failedFiles = result.failed.map(f => f.filename).join(', ');
-                        uploadError.textContent = `Some files failed to process: ${failedFiles}. Check the console for details.`;
-                        console.error('Failed files:', result.failed);
-                    }
+                    // if (result.failed && result.failed.length > 0) {
+                    //     const failedFiles = result.failed.map(f => f.filename).join(', ');
+                    //     uploadError.textContent = `Some files failed to process: ${failedFiles}. Check the console for details.`;
+                    //     console.error('Failed files:', result.failed);
+                    // }
                 } else {
                     throw new Error(result.error || 'Upload failed');
                 }
@@ -272,7 +276,7 @@
                 `).join('');
             } catch (error) {
                 console.error('Error:', error);
-                pdfList.innerHTML = '<p class="error">Error loading PDFs</p>';
+                // pdfList.innerHTML = '<p class="error">Error loading PDFs</p>';
             }
         }
     </script>
