@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload & Query PDFs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 500px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar {
+            height: 10px;
+            width: 0%;
+            background-color: #007bff;
+            border-radius: 5px;
+            transition: width 0.4s;
+        }
+
+        .output-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .output-table th, .output-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .output-table th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Mission Details</h2>
+            <table>
+                <tr>
+                    <th>Mission</th>
+                    <td>Mission Statement</td>
+                </tr>
+            </table>
+
+            <h3>Team Members</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Name</th>
+                        <th>Designation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td></td><td>Sr. CE</td></tr>
+                    <tr><td>2</td><td></td><td>FCP</td></tr>
+                    <tr><td>3</td><td></td><td>CE</td></tr>
+                    <tr><td>4</td><td></td><td>CE</td></tr>
+                    <tr><td>5</td><td></td><td>CE</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Project Documentation</h3>
+            <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
+        </div>
+
+
+        <!-- Section 1: File Upload
+        <div class="card">
+            <h2>Upload PDF Files</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <label for="fileInput" class="custom-file-upload">Choose PDFs</label>
+                <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple>
+                <button type="submit">Upload</button>
+            </form>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="status"></p>
+        </div> -->
+
+        <!-- Section 2: Query Input -->
+        <div class="card">
+            <h2>Enter Query</h2>
+            <textarea id="queryInput" rows="3" placeholder="Enter your query..."></textarea>
+            <button id="submitQuery">Submit Query</button>
+            <button id="clearQuery" class="secondary">Clear</button>
+        </div>
+
+        <!-- Section 3: Output Table -->
+        <div class="card">
+            <h2>Query Response</h2>
+            <table class="output-table">
+                <thead>
+                    <!-- <tr>
+                        <th>Result 1</th>
+                        <th>Result 2</th>
+                        <th>Result 3</th>
+                    </tr> -->
+                </thead>
+                <tbody id="outputTableBody">
+                    <tr>
+                        <td colspan="3">No data available</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+        //     event.preventDefault();
+        //     let files = document.getElementById("fileInput").files;
+        //     if (files.length === 0) {
+        //         document.getElementById("status").innerText = "Please select at least one PDF.";
+        //         return;
+        //     }
+
+        //     let formData = new FormData();
+        //     for (let file of files) {
+        //         formData.append("pdfs", file);
+        //     }
+
+        //     document.querySelector(".progress-container").style.display = "block";
+        //     document.getElementById("progressBar").style.width = "0%";
+
+        //     let response = await fetch("http://localhost:3000/upload", {
+        //         method: "POST",
+        //         body: formData
+        //     });
+
+        //     let result = await response.json();
+        //     document.getElementById("status").innerText = result.message;
+        //     document.getElementById("progressBar").style.width = "100%";
+        // });
+
+        document.getElementById("submitQuery").addEventListener("click", function() {
+            let query = document.getElementById("queryInput").value.trim();
+            if (!query) {
+                alert("Please enter a query!");
+                return;
+            }
+
+            // Make the API call
+            fetch(`http://localhost:3000/api/search/?q=${query}`)
+                .then(response => {
+                    // Check if the response is OK (status 200)
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse JSON data
+                })
+                .then(data => {
+                    // Display the data in the result div
+                    const tableBody = document.getElementById("outputTableBody");
+                    tableBody.innerHTML = '';
+
+                    data.data.forEach(res => {
+                        tableBody.innerHTML += `
+                        <tr>
+                            <td>${res.id}</td>
+                            <td>${res.name}</td>
+                            <td>${res.content}</td>
+                        </tr>
+                        `;
+                    });
+                })
+        });
+
+        // clear query text area
+        document.getElementById("clearQuery").addEventListener("click", function() {
+            document.getElementById("queryInput").value = "";
+        });
+    </script>
+</body>
+</html>
