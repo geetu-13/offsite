@@ -3,251 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission Dashboard</title>
+    <title>PDF Upload and Extract</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            background-color: #f5f5f5;
         }
-
         .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        .left, .right {
-            flex: 1;
-            background: white;
+            background-color: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        h2 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background: #007bff;
-            color: white;
-        }
-
-        input, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        .custom-file-upload {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 20px;
             text-align: center;
-           
-            transition: background 0.3s;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
         }
-
-        .custom-file-upload:hover {
-            background-color: #0056b3;
+        .upload-section.dragover {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
         }
-
-        .progress-container {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 5px;
+        .pdf-list {
+            margin-top: 20px;
+        }
+        .pdf-item {
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .pdf-content {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f8f8;
+            padding: 15px;
             margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        input[type="file"] {
             display: none;
         }
-
-        .progress-bar {
-            height: 10px;
-            width: 0%;
-            background-color: #007bff;
-            border-radius: 5px;
-            transition: width 0.4s;
-        }
-
-        .output-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .output-table th, .output-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .output-table th {
-            background-color: #007bff;
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
         }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
+        .file-input-label:hover {
+            background-color: #45a049;
         }
-
-        a:hover {
-            text-decoration: underline;
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .error {
+            color: #f44336;
+            margin: 10px 0;
+        }
+        .selected-files {
+            margin: 10px 0;
+            text-align: left;
+        }
+        .selected-file {
+            display: inline-block;
+            background-color: #e8f5e9;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .remove-file {
+            margin-left: 5px;
+            color: #f44336;
+            cursor: pointer;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>PDF Upload and Extract</h1>
         
-        <!-- Left Section: Mission & Team Details -->
-        <div class="left">
-            <h2>Mission Details</h2>
-            <table>
-                <tr>
-                    <th>Mission Name</th>
-                    <td>Mission statement</td>
-                </tr>
-            </table>
-
-            <h3>Team Members</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Sr. No.</th>
-                        <th>Name</th>
-                        <th>Designation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td>Jay Chakra</td><td>Pr. CE</td></tr>
-                    <tr><td>2</td><td>Varsha Malhotra</td><td>FCP</td></tr>
-                    <tr><td>3</td><td>Aditya Pudipeddi</td><td>CE</td></tr>
-                    <tr><td>4</td><td>Geetanjli Gupta</td><td>CE</td></tr>
-                    <tr><td>5</td><td>Devesh Kapoor</td><td>CE</td></tr>
-                </tbody>
-            </table>
-
-            <h3>Project Documentation</h3>
-            <a href="/documentation.html" id="docLink" target="">Click here to view documentation</a>
-        </div>
-
-        <!-- Right Section: Upload PDFs, Query & Output -->
-        <div class="right">
-            <!-- Upload PDFs Section -->
-            <h2>Upload PDF Files</h2>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <label for="fileInput" class="custom-file-upload" >Browse Files</label>
-                <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple style="display: none;">
-                <button type="submit">Upload PDFs</button>
-            </form>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+        <div class="upload-section" id="dropZone">
+            <h2>Upload PDFs</h2>
+            <p>Drag and drop PDF files here or click to select</p>
+            <label class="file-input-label">
+                Select PDFs
+                <input type="file" id="pdfFiles" accept=".pdf" multiple>
+            </label>
+            <div class="selected-files" id="selectedFiles"></div>
+            <div class="progress-bar">
+                <div class="progress" id="uploadProgress"></div>
             </div>
-            <p id="status"></p>
-
-            <!-- Query Input Section -->
-            <h2>Enter Query</h2>
-            <textarea id="queryInput" rows="3" placeholder="Enter your query..."></textarea>
-            <button id="submitQuery">Submit Query</button>
-
-            <!-- Output Table Section -->
-            <h2>Query Output</h2>
-            <table class="output-table">
-                <thead>
-                    <tr>
-                        <th>Column 1</th>
-                        <th>Column 2</th>
-                        <th>Column 3</th>
-                    </tr>
-                </thead>
-                <tbody id="outputTableBody">
-                    <tr>
-                        <td colspan="3">No data available</td>
-                    </tr>
-                </tbody>
-            </table>
+            <button id="uploadButton" disabled>Upload Selected Files</button>
+            <div id="uploadError" class="error"></div>
         </div>
 
+        <div id="loading" class="loading">
+            Processing PDFs... Please wait...
+        </div>
+
+        <div class="pdf-list">
+            <h2>Uploaded PDFs</h2>
+            <div id="pdfList"></div>
+        </div>
     </div>
 
     <script>
-        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-            let files = document.getElementById("fileInput").files;
-            if (files.length === 0) {
-                document.getElementById("status").innerText = "Please select at least one PDF.";
-                return;
-            }
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('pdfFiles');
+        const selectedFiles = document.getElementById('selectedFiles');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const loading = document.getElementById('loading');
+        const uploadError = document.getElementById('uploadError');
+        const pdfList = document.getElementById('pdfList');
 
-            let formData = new FormData();
-            for (let file of files) {
-                formData.append("pdfs", file);
-            }
+        let files = [];
 
-            document.querySelector(".progress-container").style.display = "block";
-            document.getElementById("progressBar").style.width = "0%";
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
 
-            let response = await fetch("http://localhost:3000/upload", {
-                method: "POST",
-                body: formData
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
+            handleFiles(droppedFiles);
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        function handleFiles(newFiles) {
+            files = [...files, ...newFiles];
+            updateSelectedFiles();
+            uploadButton.disabled = files.length === 0;
+        }
+
+        function updateSelectedFiles() {
+            selectedFiles.innerHTML = files.map((file, index) => `
+                <div class="selected-file">
+                    ${file.name}
+                    <span class="remove-file" onclick="removeFile(${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(index) {
+            files.splice(index, 1);
+            updateSelectedFiles();
+            uploadButton.disabled = files.length === 0;
+        }
+
+        // Upload handler
+        uploadButton.addEventListener('click', async () => {
+            if (files.length === 0) return;
+
+            uploadError.textContent = '';
+            loading.style.display = 'block';
+            uploadButton.disabled = true;
+
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('pdfs', file);
             });
 
-            let result = await response.json();
-            document.getElementById("status").innerText = result.message;
-            document.getElementById("progressBar").style.width = "100%";
-        });
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        document.getElementById("submitQuery").addEventListener("click", function() {
-            let query = document.getElementById("queryInput").value.trim();
-            if (!query) {
-                alert("Please enter a query!");
-                return;
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Clear files and update UI
+                    files = [];
+                    updateSelectedFiles();
+                    loadPDFs();
+
+                    // Show success message with any failures
+                    if (result.failed && result.failed.length > 0) {
+                        const failedFiles = result.failed.map(f => f.filename).join(', ');
+                        uploadError.textContent = `Some files failed to process: ${failedFiles}. Check the console for details.`;
+                        console.error('Failed files:', result.failed);
+                    }
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                uploadError.textContent = error.message || 'Error uploading PDFs';
+            } finally {
+                loading.style.display = 'none';
+                uploadButton.disabled = false;
             }
-
-            let tableBody = document.getElementById("outputTableBody");
-            tableBody.innerHTML = `
-                <tr>
-                    <td>Result 1</td>
-                    <td>Result 2</td>
-                    <td>Result 3</td>
-                </tr>
-            `;
         });
+
+        // Load PDFs on page load
+        loadPDFs();
+
+        async function loadPDFs() {
+            try {
+                const response = await fetch('/api/pdfs');
+                const pdfs = await response.json();
+                
+                pdfList.innerHTML = pdfs.map(pdf => `
+                    <div class="pdf-item">
+                        <h3>${pdf.originalName}</h3>
+                        <p>Uploaded: ${new Date(pdf.uploadDate).toLocaleString()}</p>
+                        <div class="pdf-content">
+                            <pre>${pdf.content}</pre>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                pdfList.innerHTML = '<p class="error">Error loading PDFs</p>';
+            }
+        }
     </script>
 </body>
 </html>
