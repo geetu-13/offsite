@@ -25,6 +25,11 @@
             margin-bottom: 20px;
             border-radius: 4px;
             background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+        .upload-section.dragover {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
         }
         .pdf-list {
             margin-top: 20px;
@@ -53,12 +58,29 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            margin: 10px;
         }
         button:hover {
             background-color: #45a049;
         }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
         input[type="file"] {
-            margin: 10px 0;
+            display: none;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .file-input-label:hover {
+            background-color: #45a049;
         }
         .loading {
             display: none;
@@ -69,23 +91,60 @@
             color: #f44336;
             margin: 10px 0;
         }
+        .selected-files {
+            margin: 10px 0;
+            text-align: left;
+        }
+        .selected-file {
+            display: inline-block;
+            background-color: #e8f5e9;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .remove-file {
+            margin-left: 5px;
+            color: #f44336;
+            cursor: pointer;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>PDF Upload and Extract</h1>
         
-        <div class="upload-section">
-            <h2>Upload PDF</h2>
-            <form id="uploadForm">
-                <input type="file" id="pdfFile" accept=".pdf" required>
-                <button type="submit">Upload</button>
-            </form>
+        <div class="upload-section" id="dropZone">
+            <h2>Upload PDFs</h2>
+            <p>Drag and drop PDF files here or click to select</p>
+            <label class="file-input-label">
+                Select PDFs
+                <input type="file" id="pdfFiles" accept=".pdf" multiple>
+            </label>
+            <div class="selected-files" id="selectedFiles"></div>
+            <div class="progress-bar">
+                <div class="progress" id="uploadProgress"></div>
+            </div>
+            <button id="uploadButton" disabled>Upload Selected Files</button>
             <div id="uploadError" class="error"></div>
         </div>
 
         <div id="loading" class="loading">
-            Processing PDF... Please wait...
+            Processing PDFs... Please wait...
         </div>
 
         <div class="pdf-list">
@@ -95,28 +154,72 @@
     </div>
 
     <script>
-        const uploadForm = document.getElementById('uploadForm');
-        const pdfList = document.getElementById('pdfList');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('pdfFiles');
+        const selectedFiles = document.getElementById('selectedFiles');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadProgress = document.getElementById('uploadProgress');
         const loading = document.getElementById('loading');
         const uploadError = document.getElementById('uploadError');
+        const pdfList = document.getElementById('pdfList');
 
-        // Load PDFs on page load
-        loadPDFs();
+        let files = [];
 
-        uploadForm.addEventListener('submit', async (e) => {
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            const fileInput = document.getElementById('pdfFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                uploadError.textContent = 'Please select a PDF file';
-                return;
-            }
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
+            handleFiles(droppedFiles);
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        function handleFiles(newFiles) {
+            files = [...files, ...newFiles];
+            updateSelectedFiles();
+            uploadButton.disabled = files.length === 0;
+        }
+
+        function updateSelectedFiles() {
+            selectedFiles.innerHTML = files.map((file, index) => `
+                <div class="selected-file">
+                    ${file.name}
+                    <span class="remove-file" onclick="removeFile(${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(index) {
+            files.splice(index, 1);
+            updateSelectedFiles();
+            uploadButton.disabled = files.length === 0;
+        }
+
+        // Upload handler
+        uploadButton.addEventListener('click', async () => {
+            if (files.length === 0) return;
 
             uploadError.textContent = '';
             loading.style.display = 'block';
+            uploadButton.disabled = true;
+
             const formData = new FormData();
-            formData.append('pdf', file);
+            files.forEach(file => {
+                formData.append('pdfs', file);
+            });
 
             try {
                 const response = await fetch('/api/upload', {
@@ -125,7 +228,8 @@
                 });
 
                 if (response.ok) {
-                    fileInput.value = '';
+                    files = [];
+                    updateSelectedFiles();
                     loadPDFs();
                 } else {
                     const error = await response.json();
@@ -133,11 +237,15 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                uploadError.textContent = error.message || 'Error uploading PDF';
+                uploadError.textContent = error.message || 'Error uploading PDFs';
             } finally {
                 loading.style.display = 'none';
+                uploadButton.disabled = false;
             }
         });
+
+        // Load PDFs on page load
+        loadPDFs();
 
         async function loadPDFs() {
             try {

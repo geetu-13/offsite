@@ -45,34 +45,41 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }
 
-// Handle single PDF upload and processing
-app.post("/api/upload", upload.single("pdf"), async (req, res) => {
+// Process a single PDF file
+async function processPDF(file) {
+    const dataBuffer = fs.readFileSync(file.path);
+    const data = await pdfParse(dataBuffer);
+    
+    const pdf = new PDF({
+        filename: file.filename,
+        originalName: file.originalname,
+        content: data.text
+    });
+
+    await pdf.save();
+    
+    // Clean up the uploaded file
+    fs.unlinkSync(file.path);
+    
+    return pdf;
+}
+
+// Handle multiple PDF uploads and processing
+app.post("/api/upload", upload.array("pdfs", 10), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'No files uploaded' });
         }
 
-        const dataBuffer = fs.readFileSync(req.file.path);
-        const data = await pdfParse(dataBuffer);
-        
-        const pdf = new PDF({
-            filename: req.file.filename,
-            originalName: req.file.originalname,
-            content: data.text
-        });
-
-        await pdf.save();
-        
-        // Clean up the uploaded file
-        fs.unlinkSync(req.file.path);
+        const results = await Promise.all(req.files.map(file => processPDF(file)));
 
         res.status(201).json({
-            message: 'PDF uploaded and processed successfully',
-            pdf: pdf
+            message: `${results.length} PDF(s) uploaded and processed successfully`,
+            pdfs: results
         });
     } catch (error) {
-        console.error('Error processing PDF:', error);
-        res.status(500).json({ error: 'Error processing PDF' });
+        console.error('Error processing PDFs:', error);
+        res.status(500).json({ error: 'Error processing PDFs' });
     }
 });
 
@@ -97,25 +104,6 @@ app.get("/api/pdf/:id", async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error fetching PDF' });
     }
-});
-
-// Handle multiple file uploads (max 100 files)
-app.post("/upload", upload.array("pdfs", 100), (req, res) => {
-    if (!req.files || req.files.length === 0) {
-        console.log("No files uploaded.");
-        return res.status(400).json({ message: "No files uploaded!" });
-    }
-
-    // Log details of uploaded files
-    console.log(`\n📂 ${req.files.length} PDF(s) uploaded:`);
-    req.files.forEach((file, index) => {
-        console.log(`${index + 1}. ${file.originalname} (Size: ${file.size} bytes)`);
-    });
-
-    res.json({ 
-        message: `${req.files.length} PDF files uploaded successfully!`,
-        uploadedFiles: req.files.map(file => file.originalname)
-    });
 });
 
 // Serve uploaded files
