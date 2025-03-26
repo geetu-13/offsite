@@ -227,13 +227,22 @@
                     body: formData
                 });
 
+                const result = await response.json();
+
                 if (response.ok) {
+                    // Clear files and update UI
                     files = [];
                     updateSelectedFiles();
                     loadPDFs();
+
+                    // Show success message with any failures
+                    if (result.failed && result.failed.length > 0) {
+                        const failedFiles = result.failed.map(f => f.filename).join(', ');
+                        uploadError.textContent = `Some files failed to process: ${failedFiles}. Check the console for details.`;
+                        console.error('Failed files:', result.failed);
+                    }
                 } else {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Upload failed');
+                    throw new Error(result.error || 'Upload failed');
                 }
             } catch (error) {
                 console.error('Error:', error);
