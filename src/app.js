@@ -6,6 +6,7 @@ const path = require("path");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 // Configure Multer storage
 const storage = multer.diskStorage({
@@ -21,6 +22,8 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
 });
+
+
 
 // Handle file uploads (max 100 files)
 app.post("/upload", upload.array("pdfs", 100), (req, res) => {
@@ -44,4 +47,4 @@ app.post("/upload", upload.array("pdfs", 100), (req, res) => {
 // Serve uploaded files
 app.use("/uploads", express.static("uploads"));
 
-app.listen(3000, () => console.log("\n🚀 Server running on port 3000"));
+module.exports = app;
