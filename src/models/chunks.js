@@ -1,10 +1,9 @@
 require('dotenv').config();
 const {client} = require('../connection');
-const database = client.db(process.env.DATABASE);
-const collection = database.collection(process.env.COLLECTION);
-
 
 const save = async (chunk) => {
+    const database = client.db(process.env.DATABASE);
+    const collection = database.collection(process.env.COLLECTION);
     return await collection.insertOne(chunk);
 }
 
