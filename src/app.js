@@ -62,7 +62,7 @@ app.get("/api/search", async (req, res) => {
 
     const queryEmbedding  = await generateEmbeding(query);
     const relatedChunks = await fetchRelatedChunks(queryEmbedding);
-    const response = await generateQueryResponse(relatedChunks);
+    const response = await generateQueryResponse(relatedChunks, query);
     console.log(relatedChunks);
     res.json({
         query: query,
