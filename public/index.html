@@ -139,7 +139,7 @@
             <div class="progress-bar">
                 <div class="progress" id="uploadProgress"></div>
             </div>
-            <button id="uploadButton" disabled>Upload Selected Files</button>
+            <button id="uploadButton" disabled>Process Selected Files</button>
             <div id="uploadError" class="error"></div>
         </div>
 
@@ -147,10 +147,7 @@
             Processing PDFs... Please wait...
         </div>
 
-        <div class="pdf-list">
-            <h2>Uploaded PDFs</h2>
-            <div id="pdfList"></div>
-        </div>
+    
     </div>
 
     <script>
@@ -234,7 +231,7 @@
                     files = [];
                     updateSelectedFiles();
                     loadPDFs();
-                    alert('PDFs uploaded successfully');
+                    alert('PDFs processed successfully');
 
                     // Redirect to the query page after successful upload
                     window.location.href = '/query.html';
