@@ -3,279 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Upload and Extract</title>
+    <title>Upload & Query PDFs</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
         }
+
         .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 500px;
         }
-        .upload-section {
-            border: 2px dashed #ccc;
+
+        .card {
+            background: white;
             padding: 20px;
-            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            border-radius: 4px;
-            background-color: #fafafa;
-            transition: all 0.3s ease;
+            text-align: left;
         }
-        .upload-section.dragover {
-            border-color: #4CAF50;
-            background-color: #e8f5e9;
-        }
-        .pdf-list {
-            margin-top: 20px;
-        }
-        .pdf-item {
-            border: 1px solid #eee;
-            padding: 15px;
+
+        h2 {
             margin-bottom: 15px;
-            border-radius: 4px;
-            background-color: white;
+            color: #333;
         }
-        .pdf-content {
-            max-height: 200px;
-            overflow-y: auto;
-            background: #f8f8f8;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+
         input[type="file"] {
             display: none;
         }
-        .file-input-label {
+
+        .custom-file-upload {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            margin: 10px;
+            transition: background 0.3s;
         }
-        .file-input-label:hover {
-            background-color: #45a049;
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
         }
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .error {
-            color: #f44336;
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
             margin: 10px 0;
-        }
-        .selected-files {
-            margin: 10px 0;
-            text-align: left;
-        }
-        .selected-file {
-            display: inline-block;
-            background-color: #e8f5e9;
-            padding: 5px 10px;
-            margin: 5px;
-            border-radius: 4px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 14px;
         }
-        .remove-file {
-            margin-left: 5px;
-            color: #f44336;
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
         }
-        .progress-bar {
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .progress-container {
             width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
         }
-        .progress {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar {
+            height: 10px;
             width: 0%;
-            height: 100%;
-            background-color: #4CAF50;
-            transition: width 0.3s ease;
+            background-color: #007bff;
+            border-radius: 5px;
+            transition: width 0.4s;
+        }
+
+        .output-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .output-table th, .output-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .output-table th {
+            background-color: #007bff;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>PDF Upload and Extract</h1>
-        
-        <div class="upload-section" id="dropZone">
-            <h2>Upload PDFs</h2>
-            <p>Drag and drop PDF files here or click to select</p>
-            <label class="file-input-label">
-                Select PDFs
-                <input type="file" id="pdfFiles" accept=".pdf" multiple>
-            </label>
-            <div class="selected-files" id="selectedFiles"></div>
-            <div class="progress-bar">
-                <div class="progress" id="uploadProgress"></div>
-            </div>
-            <button id="uploadButton" disabled>Process Selected Files</button>
-            <div id="uploadError" class="error"></div>
+        <div class="card">
+            <h2>Mission Details</h2>
+            <table>
+                <tr>
+                    <th>Mission</th>
+                    <td>Mission Statement</td>
+                </tr>
+            </table>
+
+            <h3>Team Members</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Name</th>
+                        <th>Designation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td></td><td>Sr. CE</td></tr>
+                    <tr><td>2</td><td></td><td>FCP</td></tr>
+                    <tr><td>3</td><td></td><td>CE</td></tr>
+                    <tr><td>4</td><td></td><td>CE</td></tr>
+                    <tr><td>5</td><td></td><td>CE</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Project Documentation</h3>
+            <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
         </div>
 
-        <div id="loading" class="loading">
-            Processing PDFs... Please wait...
+        <!-- Section 2: Query Input -->
+        <div class="card">
+            <h2>Enter Query</h2>
+            <textarea id="queryInput" rows="3" placeholder="Enter your query..."></textarea>
+            <button id="submitQuery">Submit Query</button>
+            <button id="clearQuery" class="secondary">Clear</button>
         </div>
 
-    
+        <!-- Section 3: Output Table -->
+        <div class="card">
+            <h2>Query Response</h2>
+            <p id="chatbot-response"></p>
+            <table class="output-table">
+                <thead></thead>
+                <tbody id="outputTableBody">
+                    <tr>
+                        <td colspan="3">No data available</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('pdfFiles');
-        const selectedFiles = document.getElementById('selectedFiles');
-        const uploadButton = document.getElementById('uploadButton');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const loading = document.getElementById('loading');
-        const uploadError = document.getElementById('uploadError');
-        const pdfList = document.getElementById('pdfList');
 
-        let files = [];
-
-        // Drag and drop handlers
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
-            handleFiles(droppedFiles);
-        });
-
-        // File input handler
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(Array.from(e.target.files));
-        });
-
-        function handleFiles(newFiles) {
-            files = [...files, ...newFiles];
-            updateSelectedFiles();
-            uploadButton.disabled = files.length === 0;
-        }
-
-        function updateSelectedFiles() {
-            selectedFiles.innerHTML = files.map((file, index) => `
-                <div class="selected-file">
-                    ${file.name}
-                    <span class="remove-file" onclick="removeFile(${index})">×</span>
-                </div>
-            `).join('');
-        }
-
-        function removeFile(index) {
-            files.splice(index, 1);
-            updateSelectedFiles();
-            uploadButton.disabled = files.length === 0;
-        }
-
-        // Upload handler
-        uploadButton.addEventListener('click', async () => {
-            if (files.length === 0) return;
-
-            uploadError.textContent = '';
-            loading.style.display = 'block';
-            uploadButton.disabled = true;
-
-            const formData = new FormData();
-            files.forEach(file => {
-                formData.append('pdfs', file);
-            });
-
-            try {
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    // Clear files and update UI
-                    files = [];
-                    updateSelectedFiles();
-                    loadPDFs();
-                    alert('PDFs processed successfully');
-
-                    // Redirect to the query page after successful upload
-                    window.location.href = '/query.html';
-
-                    // Show success message with any failures
-                    // if (result.failed && result.failed.length > 0) {
-                    //     const failedFiles = result.failed.map(f => f.filename).join(', ');
-                    //     uploadError.textContent = `Some files failed to process: ${failedFiles}. Check the console for details.`;
-                    //     console.error('Failed files:', result.failed);
-                    // }
-                } else {
-                    throw new Error(result.error || 'Upload failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                uploadError.textContent = error.message || 'Error uploading PDFs';
-            } finally {
-                loading.style.display = 'none';
-                uploadButton.disabled = false;
+        document.getElementById("submitQuery").addEventListener("click", function() {
+            let query = document.getElementById("queryInput").value.trim();
+            if (!query) {
+                alert("Please enter a query!");
+                return;
             }
+
+            // Make the API call
+            fetch(`http://localhost:3000/api/search/?q=${query}`)
+                .then(response => {
+                    // Check if the response is OK (status 200)
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse JSON data
+                })
+                .then(data => {
+                    // Display the data in the result div
+                    const chatBotResponse = document.getElementById("chatbot-response");
+                    chatBotResponse.innerHTML = '';
+                    chatBotResponse.innerHTML = data.answer;
+
+
+                    const tableBody = document.getElementById("outputTableBody");
+                    tableBody.innerHTML = '';
+
+                    data.data.forEach(res => {
+                        tableBody.innerHTML += `
+                        <tr>
+                            <td>${res.id}</td>
+                            <td>${res.name}</td>
+                            <td>${res.content}</td>
+                        </tr>
+                        `;
+                    });
+                })
         });
 
-        // Load PDFs on page load
-        loadPDFs();
-
-        async function loadPDFs() {
-            try {
-                const response = await fetch('/api/pdfs');
-                const pdfs = await response.json();
-                
-                pdfList.innerHTML = pdfs.map(pdf => `
-                    <div class="pdf-item">
-                        <h3>${pdf.originalName}</h3>
-                        <p>Uploaded: ${new Date(pdf.uploadDate).toLocaleString()}</p>
-                        <div class="pdf-content">
-                            <pre>${pdf.content}</pre>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error:', error);
-                // pdfList.innerHTML = '<p class="error">Error loading PDFs</p>';
-            }
-        }
+        // clear query text area
+        document.getElementById("clearQuery").addEventListener("click", function() {
+            document.getElementById("queryInput").value = "";
+        });
     </script>
 </body>
 </html>
