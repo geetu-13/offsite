@@ -45,7 +45,7 @@ Text: ${text}`;
     }
 }
 
-const generateQueryPromptFromChunks = (chunks) => {
+const generateQueryPromptFromChunks = (chunks, query) => {
     let data = "";
 
     for (let i = 0; i< chunks.length; i++) {
@@ -77,13 +77,15 @@ Cite specific information in the context wherever possible and avoid bringing th
 --- Start Context ---
 {{${data}}}
 --- End Context ---
-`
 
+Based on the above context. Answer the following question: ${query}
+`
+    console.log(prompt)
     return prompt;
 }
 
-const generateQueryResponse = async (chunks) => {
-    const prompt = generateQueryPromptFromChunks(chunks);
+const generateQueryResponse = async (chunks, query) => {
+    const prompt = generateQueryPromptFromChunks(chunks, query);
     return await getResponse(prompt);
 }
 
