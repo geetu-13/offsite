@@ -2,6 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const { processPDF, getAllPDFs, getPDFById } = require("./services/pdf");
+const { generateEmbeding, generateQueryResponse } = require("./services/llm");
+const { fetchRelatedChunks } = require("./models/chunks");
 
 const app = express();
 app.use(cors());
@@ -55,44 +57,18 @@ app.post("/api/upload", upload.array("pdfs", 10), async (req, res) => {
     }
 });
 
-// // Dummy search endpoint
-app.get("/api/search", (req, res) => {
+app.get("/api/search", async (req, res) => {
     const query = req.query.q || '';
+
+    const queryEmbedding  = await generateEmbeding(query);
+    const relatedChunks = await fetchRelatedChunks(queryEmbedding);
+    const response = await generateQueryResponse(relatedChunks);
+    console.log(relatedChunks);
     res.json({
         query: query,
-        data: [
-            {
-                id: `Result 1 for "${query}"`,
-                name: `Result 2 for "${query}"`,
-                content: `Result 3 for "${query}"`
-            }
-        ]
+        answer: response,
+        data: relatedChunks
     });
 });
-
-
-// // Get all processed PDFs
-// app.get("/api/pdfs", async (req, res) => {
-//     try {
-//         const pdfs = await getAllPDFs();
-//         res.json(pdfs);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error fetching PDFs' });
-//     }
-// });
-
-// // Get a specific PDF by ID
-// app.get("/api/pdf/:id", async (req, res) => {
-//     try {
-//         const pdf = await getPDFById(req.params.id);
-//         res.json(pdf);
-//     } catch (error) {
-//         if (error.message === 'PDF not found') {
-//             res.status(404).json({ error: 'PDF not found' });
-//         } else {
-//             res.status(500).json({ error: 'Error fetching PDF' });
-//         }
-//     }
-// });
 
 module.exports = app;

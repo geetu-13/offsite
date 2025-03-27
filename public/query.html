@@ -25,7 +25,7 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            text-align: center;
+            text-align: left;
         }
 
         h2 {
@@ -163,21 +163,6 @@
             <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
         </div>
 
-
-        <!-- Section 1: File Upload
-        <div class="card">
-            <h2>Upload PDF Files</h2>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <label for="fileInput" class="custom-file-upload">Choose PDFs</label>
-                <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple>
-                <button type="submit">Upload</button>
-            </form>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <p id="status"></p>
-        </div> -->
-
         <!-- Section 2: Query Input -->
         <div class="card">
             <h2>Enter Query</h2>
@@ -189,14 +174,9 @@
         <!-- Section 3: Output Table -->
         <div class="card">
             <h2>Query Response</h2>
+            <p id="chatbot-response"></p>
             <table class="output-table">
-                <thead>
-                    <!-- <tr>
-                        <th>Result 1</th>
-                        <th>Result 2</th>
-                        <th>Result 3</th>
-                    </tr> -->
-                </thead>
+                <thead></thead>
                 <tbody id="outputTableBody">
                     <tr>
                         <td colspan="3">No data available</td>
@@ -207,31 +187,6 @@
     </div>
 
     <script>
-        // document.getElementById("uploadForm").addEventListener("submit", async function(event) {
-        //     event.preventDefault();
-        //     let files = document.getElementById("fileInput").files;
-        //     if (files.length === 0) {
-        //         document.getElementById("status").innerText = "Please select at least one PDF.";
-        //         return;
-        //     }
-
-        //     let formData = new FormData();
-        //     for (let file of files) {
-        //         formData.append("pdfs", file);
-        //     }
-
-        //     document.querySelector(".progress-container").style.display = "block";
-        //     document.getElementById("progressBar").style.width = "0%";
-
-        //     let response = await fetch("http://localhost:3000/upload", {
-        //         method: "POST",
-        //         body: formData
-        //     });
-
-        //     let result = await response.json();
-        //     document.getElementById("status").innerText = result.message;
-        //     document.getElementById("progressBar").style.width = "100%";
-        // });
 
         document.getElementById("submitQuery").addEventListener("click", function() {
             let query = document.getElementById("queryInput").value.trim();
@@ -251,6 +206,11 @@
                 })
                 .then(data => {
                     // Display the data in the result div
+                    const chatBotResponse = document.getElementById("chatbot-response");
+                    chatBotResponse.innerHTML = '';
+                    chatBotResponse.innerHTML = data.answer;
+
+
                     const tableBody = document.getElementById("outputTableBody");
                     tableBody.innerHTML = '';
 

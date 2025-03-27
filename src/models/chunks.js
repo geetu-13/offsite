@@ -15,7 +15,35 @@ const save = async (chunk) => {
 }
 
 const fetchRelatedChunks = async (vector) => {
-    // Need to implement vector search later;
+    
+    await client.connect();
+    const database = client.db(process.env.DATABASE);
+    const collection = database.collection(process.env.COLLECTION);
+    
+    console.log(vector);
+
+    const pipeline = [
+        {
+            "$vectorSearch": {
+              "exact": true,
+              "index": "neural-nexus",
+              "limit": 3,
+            //   "numCandidates": 10,
+              "path": "embeddings",
+              "queryVector": vector
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                embeddings:0
+            }
+        }
+    ]
+
+
+
+    return await collection.aggregate(pipeline).toArray();
 }
 
 
