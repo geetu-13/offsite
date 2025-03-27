@@ -137,7 +137,11 @@
             <table>
                 <tr>
                     <th>Mission</th>
-                    <td>Mission Statement</td>
+                    <td>To explore and innovate in the field of technology.</td>
+                </tr>
+                <tr>
+                    <th>Mission Statement</th>
+                    <td>Empowering individuals and organizations through cutting-edge solutions.</td>
                 </tr>
             </table>
 
@@ -151,85 +155,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>1</td><td></td><td>Sr. CE</td></tr>
-                    <tr><td>2</td><td></td><td>FCP</td></tr>
-                    <tr><td>3</td><td></td><td>CE</td></tr>
-                    <tr><td>4</td><td></td><td>CE</td></tr>
-                    <tr><td>5</td><td></td><td>CE</td></tr>
+                    <tr><td>1</td><td>Jay Chakra</td><td>Pr. CE</td></tr>
+                    <tr><td>2</td><td>Varsha Malhotra</td><td>FCP</td></tr>
+                    <tr><td>3</td><td>Aditya Pudipeddi</td><td>CE</td></tr>
+                    <tr><td>4</td><td>Geetanjli Gupta</td><td>CE</td></tr>
+                    <tr><td>5</td><td>Divesh Kapoor</td><td>CE</td></tr>
                 </tbody>
             </table>
 
             <h3>Project Documentation</h3>
-            <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
+            <a href="documentation.html" id="docLink" target="_blank">Click here to view documentation</a>
+
+            <h3>ASK ME</h3>
+            <a href="uploadDocument.html" id="docLink" target="_blank">Click here to upload document</a><br>
+            <a href="query.html" id="docLink" target="_blank">Click here to ask a question</a>
+            
         </div>
 
-        <!-- Section 2: Query Input -->
-        <div class="card">
-            <h2>Enter Query</h2>
-            <textarea id="queryInput" rows="3" placeholder="Enter your query..."></textarea>
-            <button id="submitQuery">Submit Query</button>
-            <button id="clearQuery" class="secondary">Clear</button>
-        </div>
-
-        <!-- Section 3: Output Table -->
-        <div class="card">
-            <h2>Query Response</h2>
-            <p id="chatbot-response"></p>
-            <table class="output-table">
-                <thead></thead>
-                <tbody id="outputTableBody">
-                    <tr>
-                        <td colspan="3">No data available</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
-    <script>
-
-        document.getElementById("submitQuery").addEventListener("click", function() {
-            let query = document.getElementById("queryInput").value.trim();
-            if (!query) {
-                alert("Please enter a query!");
-                return;
-            }
-
-            // Make the API call
-            fetch(`http://localhost:3000/api/search/?q=${query}`)
-                .then(response => {
-                    // Check if the response is OK (status 200)
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); // Parse JSON data
-                })
-                .then(data => {
-                    // Display the data in the result div
-                    const chatBotResponse = document.getElementById("chatbot-response");
-                    chatBotResponse.innerHTML = '';
-                    chatBotResponse.innerHTML = data.answer;
-
-
-                    const tableBody = document.getElementById("outputTableBody");
-                    tableBody.innerHTML = '';
-
-                    data.data.forEach(res => {
-                        tableBody.innerHTML += `
-                        <tr>
-                            <td>${res.id}</td>
-                            <td>${res.name}</td>
-                            <td>${res.content}</td>
-                        </tr>
-                        `;
-                    });
-                })
-        });
-
-        // clear query text area
-        document.getElementById("clearQuery").addEventListener("click", function() {
-            document.getElementById("queryInput").value = "";
-        });
-    </script>
+    
 </body>
 </html>
