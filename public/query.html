@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload & Query PDFs</title>
+    <title>Query PDFs</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -128,40 +128,22 @@
             background-color: #007bff;
             color: white;
         }
+        .home-icon-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+   
     <div class="container">
-        <div class="card">
-            <h2>Mission Details</h2>
-            <table>
-                <tr>
-                    <th>Mission</th>
-                    <td>Mission Statement</td>
-                </tr>
-            </table>
-
-            <h3>Team Members</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Sr. No.</th>
-                        <th>Name</th>
-                        <th>Designation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td></td><td>Sr. CE</td></tr>
-                    <tr><td>2</td><td></td><td>FCP</td></tr>
-                    <tr><td>3</td><td></td><td>CE</td></tr>
-                    <tr><td>4</td><td></td><td>CE</td></tr>
-                    <tr><td>5</td><td></td><td>CE</td></tr>
-                </tbody>
-            </table>
-
-            <h3>Project Documentation</h3>
-            <a href="#" id="docLink" target="_blank">Click here to view documentation</a>
-        </div>
+    
+    <div class="home-icon-container">
+        <a href="index.html">
+            <img src="home.png" alt="Home" style="width: 40px; height: 40px; cursor: pointer;" title="Go to Home">
+        </a>
+    </div>
+     
 
         <!-- Section 2: Query Input -->
         <div class="card">
@@ -194,6 +176,8 @@
                 alert("Please enter a query!");
                 return;
             }
+
+            
 
             // Make the API call
             fetch(`http://localhost:3000/api/search/?q=${query}`)
@@ -230,6 +214,8 @@
         document.getElementById("clearQuery").addEventListener("click", function() {
             document.getElementById("queryInput").value = "";
         });
+
+       
     </script>
 </body>
 </html>
